@@ -49,15 +49,24 @@ public final class BedrockDialog {
     /**
      * Initializes the BedrockDialog singleton.
      * Must be called once in {@code onEnable()} before any other usage.
+     * If already initialized, logs a warning and returns without re-initializing.
      *
      * @param plugin the owning plugin
-     * @throws IllegalStateException if already initialized
      */
     public static void init(Plugin plugin) {
         if (instance != null) {
-            throw new IllegalStateException("BedrockDialog is already initialized");
+            plugin.getLogger().warning("[BedrockDialog] Already initialized — ignoring duplicate init() call. Use BedrockDialog.get() instead.");
+            return;
         }
         instance = new BedrockDialog(plugin);
+    }
+
+    /**
+     * Resets the singleton instance, allowing a subsequent {@link #init(Plugin)} call.
+     * Should be called in {@code onDisable()} by the owning plugin.
+     */
+    public static void reset() {
+        instance = null;
     }
 
     /**

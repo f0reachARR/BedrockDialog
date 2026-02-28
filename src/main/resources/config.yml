@@ -1,0 +1,70 @@
+dialogs:
+  welcome:
+    type: multi_button
+    title: "ようこそ！"
+    body: "{player} さん、ようこそ"
+    buttons:
+      - label: "スポーンへ"
+        actions:
+          - type: run_as_player
+            command: "spawn"
+      - label: "ルール確認"
+        actions:
+          - type: run_as_console
+            command: "tell {player} ルールを守ってね"
+      - label: "閉じる"
+        actions: []
+
+  confirm_pvp:
+    type: confirm
+    title: "PVPに参加しますか？"
+    body: "{player} さん、PVPに参加しますか？"
+    yes_label: "参加する"
+    no_label: "やめておく"
+    on_yes:
+      - type: run_as_console
+        command: "tell {player} PVPに参加しました"
+    on_no: []
+
+  notice_rules:
+    type: notice
+    title: "サーバールール"
+    body: "1. 荒らし禁止\n2. チートツール禁止\n3. 楽しく遊ぼう！"
+    dismiss_label: "わかった"
+    on_dismiss: []
+
+  item_form:
+    type: input
+    title: "アイテム支給フォーム"
+    body: "支給する内容を選んでください"
+    submit_label: "送信"
+    inputs:
+      - type: text
+        key: player_name
+        label: "対象プレイヤー名"
+        placeholder: "例: Steve"
+        default: ""
+      - type: slider
+        key: amount
+        label: "数量"
+        min: 1
+        max: 64
+        step: 1
+        default: 1
+      - type: boolean
+        key: notify
+        label: "通知する"
+        default: true
+      - type: dropdown
+        key: item
+        label: "アイテム"
+        default: 0
+        options:
+          - id: diamond
+            label: "ダイヤモンド"
+          - id: gold_ingot
+            label: "金インゴット"
+    on_submit:
+      - type: run_as_console
+        command: "give {input.player_name} {input.item} {input.amount}"
+    on_close: []

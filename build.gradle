@@ -26,3 +26,9 @@ dependencies {
     compileOnly("org.geysermc.geyser:api:2.9.0-SNAPSHOT")
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 }
+
+processResources {
+    filesMatching("paper-plugin.yml") {
+        expand(version: project.version)
+    }
+}
