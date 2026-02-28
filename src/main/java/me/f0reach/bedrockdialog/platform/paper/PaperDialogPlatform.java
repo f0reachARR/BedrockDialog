@@ -195,7 +195,7 @@ public class PaperDialogPlatform implements DialogPlatform {
                 case SliderInput si -> {
                     // Long factory: (key, width, label, labelFormat, start, end, initial, step)
                     result.add(DialogInput.numberRange(
-                            si.key(), 200, si.label(), "%s",
+                            si.key(), 200, si.label(), "options.generic_value",
                             si.min(), si.max(), si.defaultValue(), si.step()
                     ));
                 }
@@ -203,9 +203,12 @@ public class PaperDialogPlatform implements DialogPlatform {
                     result.add(DialogInput.bool(bi.key(), bi.label(), bi.defaultValue(), "true", "false"));
                 }
                 case DropdownInput di -> {
-                    List<SingleOptionDialogInput.OptionEntry> entries = di.options().stream()
-                            .map(opt -> SingleOptionDialogInput.OptionEntry.create(opt.id(), opt.label(), true))
-                            .toList();
+                    List<SingleOptionDialogInput.OptionEntry> entries = new ArrayList<>();
+                    for (int i = 0; i < di.options().size(); i++) {
+                        DropdownInput.DropdownOption opt = di.options().get(i);
+                        entries.add(SingleOptionDialogInput.OptionEntry.create(
+                                opt.id(), opt.label(), i == di.defaultIndex()));
+                    }
                     result.add(DialogInput.singleOption(di.key(), 200, entries, di.label(), true));
                 }
             }
