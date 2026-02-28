@@ -14,6 +14,8 @@ import me.f0reach.bedrockdialog.input.SliderInput;
 import me.f0reach.bedrockdialog.input.TextInput;
 import me.f0reach.bedrockdialog.response.InputResponse;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -103,10 +105,10 @@ public class DialogConfigLoader {
 
         return player -> {
             NoticeDialog.Builder b = NoticeDialog.builder()
-                .title(Component.text(sub(titleTpl, player)))
-                .dismissLabel(dismissLabel)
+                .title(sub(titleTpl, player))
+                .dismissLabel(sub(dismissLabel, player))
                 .onDismiss(p -> DialogAction.execute(onDismiss, p, plugin, this));
-            if (bodyTpl != null) b.body(Component.text(sub(bodyTpl, player)));
+            if (bodyTpl != null) b.body(sub(bodyTpl, player));
             return b.build();
         };
     }
@@ -121,12 +123,12 @@ public class DialogConfigLoader {
 
         return player -> {
             ConfirmDialog.Builder b = ConfirmDialog.builder()
-                .title(Component.text(sub(titleTpl, player)))
-                .yesLabel(yesLabel)
-                .noLabel(noLabel)
+                .title(sub(titleTpl, player))
+                .yesLabel(sub(yesLabel, player))
+                .noLabel(sub(noLabel, player))
                 .onYes(p -> DialogAction.execute(onYes, p, plugin, this))
                 .onNo(p -> DialogAction.execute(onNo, p, plugin, this));
-            if (bodyTpl != null) b.body(Component.text(sub(bodyTpl, player)));
+            if (bodyTpl != null) b.body(sub(bodyTpl, player));
             return b.build();
         };
     }
@@ -148,12 +150,12 @@ public class DialogConfigLoader {
 
         return player -> {
             MultiButtonDialog.Builder b = MultiButtonDialog.builder()
-                .title(Component.text(sub(titleTpl, player)));
-            if (bodyTpl != null) b.body(Component.text(sub(bodyTpl, player)));
+                .title(sub(titleTpl, player));
+            if (bodyTpl != null) b.body(sub(bodyTpl, player));
             for (ButtonSpec btn : buttons) {
-                b.button(btn.label(), p -> DialogAction.execute(btn.actions(), p, plugin, this));
+                b.button(sub(btn.label(), player), p -> DialogAction.execute(btn.actions(), p, plugin, this));
             }
-            if (buttons.isEmpty()) b.button("OK", p -> {});
+            if (buttons.isEmpty()) b.button(sub("OK"), p -> {});
             return b.build();
         };
     }
@@ -173,9 +175,9 @@ public class DialogConfigLoader {
 
         return player -> {
             InputDialog.Builder b = InputDialog.builder()
-                .title(Component.text(sub(titleTpl, player)))
-                .submitLabel(submitLabel);
-            if (bodyTpl != null) b.body(Component.text(sub(bodyTpl, player)));
+                .title(sub(titleTpl, player))
+                .submitLabel(sub(submitLabel, player));
+            if (bodyTpl != null) b.body(sub(bodyTpl, player));
             for (InputSpec spec : specs) b.addInput(spec.buildInput());
             b.onSubmit((p, response) -> {
                 Map<String, String> inputValues = new LinkedHashMap<>();
@@ -204,7 +206,7 @@ public class DialogConfigLoader {
     private record TextSpec(String key, String label, String placeholder, String defaultValue)
             implements InputSpec {
         @Override public DialogInput buildInput() {
-            TextInput.Builder b = TextInput.builder(key).label(Component.text(label));
+            TextInput.Builder b = TextInput.builder(key).label(sub(label));
             if (!placeholder.isEmpty()) b.placeholder(placeholder);
             if (!defaultValue.isEmpty()) b.defaultValue(defaultValue);
             return b.build();
@@ -215,7 +217,7 @@ public class DialogConfigLoader {
     private record SliderSpec(String key, String label, float min, float max, float step, float defaultValue)
             implements InputSpec {
         @Override public DialogInput buildInput() {
-            return SliderInput.builder(key).label(Component.text(label))
+            return SliderInput.builder(key).label(sub(label))
                 .min(min).max(max).step(step).defaultValue(defaultValue).build();
         }
         @Override public String valueAsString(InputResponse r) {
@@ -227,7 +229,7 @@ public class DialogConfigLoader {
     private record BooleanSpec(String key, String label, boolean defaultValue)
             implements InputSpec {
         @Override public DialogInput buildInput() {
-            return BooleanInput.builder(key).label(Component.text(label)).defaultValue(defaultValue).build();
+            return BooleanInput.builder(key).label(sub(label)).defaultValue(defaultValue).build();
         }
         @Override public String valueAsString(InputResponse r) { return String.valueOf(r.getBoolean(key)); }
     }
@@ -237,7 +239,7 @@ public class DialogConfigLoader {
             implements InputSpec {
         @Override public DialogInput buildInput() {
             DropdownInput.Builder b = DropdownInput.builder(key)
-                .label(Component.text(label)).defaultIndex(defaultIndex);
+                .label(sub(label)).defaultIndex(defaultIndex);
             for (DropdownInput.DropdownOption opt : options) b.addOption(opt.id(), opt.label());
             return b.build();
         }
@@ -274,7 +276,7 @@ public class DialogConfigLoader {
                 List<DropdownInput.DropdownOption> opts = nestedMapList(map, "options").stream()
                     .map(m -> new DropdownInput.DropdownOption(
                         toString(m.get("id")),
-                        Component.text(toString(mapGet(m, "label", "")))))
+                        sub(toString(mapGet(m, "label", "")))))
                     .toList();
                 yield new DropdownSpec(key, label, toInt(mapGet(map, "default", 0)), opts);
             }
@@ -307,8 +309,14 @@ public class DialogConfigLoader {
 
     // ── Utilities ──────────────────────────────────────────────────────────
 
-    private static String sub(String template, Player player) {
-        return template.replace("{player}", player.getName());
+    private static MiniMessage MM = MiniMessage.miniMessage();
+
+    private static Component sub(String template, Player player) {
+        return MM.deserialize(template, Placeholder.unparsed("player", player.getName()));
+    }
+
+    private static Component sub(String template) {
+        return MM.deserialize(template);
     }
 
     @SuppressWarnings("unchecked")

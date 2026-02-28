@@ -37,7 +37,7 @@ public non-sealed interface MultiButtonDialog extends UnifiedDialog {
      * @param label   Display label of the button
      * @param onClick Action to perform when the button is clicked
      */
-    record DialogButton(String label, Consumer<Player> onClick) {}
+    record DialogButton(Component label, Consumer<Player> onClick) {}
 
     static Builder builder() {
         return new Builder();
@@ -61,7 +61,7 @@ public non-sealed interface MultiButtonDialog extends UnifiedDialog {
             return this;
         }
 
-        public Builder button(String label, Consumer<Player> onClick) {
+        public Builder button(Component label, Consumer<Player> onClick) {
             this.buttons.add(new DialogButton(label, onClick));
             return this;
         }

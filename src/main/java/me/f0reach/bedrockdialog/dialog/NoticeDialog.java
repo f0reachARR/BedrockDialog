@@ -20,7 +20,7 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
 
     @Nullable Component body();
 
-    String dismissLabel();
+    Component dismissLabel();
 
     Consumer<Player> onDismiss();
 
@@ -37,7 +37,7 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
     final class Builder {
         private Component title = Component.empty();
         private @Nullable Component body = null;
-        private String dismissLabel = "OK";
+        private Component dismissLabel = Component.text("OK");
         private Consumer<Player> onDismiss = p -> {};
         private Consumer<Player> onClose = p -> {};
 
@@ -53,7 +53,7 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
             return this;
         }
 
-        public Builder dismissLabel(String dismissLabel) {
+        public Builder dismissLabel(Component dismissLabel) {
             this.dismissLabel = dismissLabel;
             return this;
         }
@@ -71,13 +71,13 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
         public NoticeDialog build() {
             final Component t = title;
             final @Nullable Component b = body;
-            final String dl = dismissLabel;
+            final Component dl = dismissLabel;
             final Consumer<Player> dismiss = onDismiss;
             final Consumer<Player> close = onClose;
             return new NoticeDialog() {
                 @Override public Component title() { return t; }
                 @Override public @Nullable Component body() { return b; }
-                @Override public String dismissLabel() { return dl; }
+                @Override public Component dismissLabel() { return dl; }
                 @Override public Consumer<Player> onDismiss() { return dismiss; }
                 @Override public Consumer<Player> onClose() { return close; }
             };

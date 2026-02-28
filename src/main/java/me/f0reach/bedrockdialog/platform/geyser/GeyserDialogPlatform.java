@@ -51,8 +51,8 @@ public class GeyserDialogPlatform implements DialogPlatform {
         ModalForm form = ModalForm.builder()
                 .title(title)
                 .content(content)
-                .button1(d.yesLabel())
-                .button2(d.noLabel())
+                .button1(plain(d.yesLabel()))
+                .button2(plain(d.noLabel()))
                 .validResultHandler((form2, response) -> {
                     if (response.clickedFirst()) {
                         d.onYes().accept(player);
@@ -74,7 +74,7 @@ public class GeyserDialogPlatform implements DialogPlatform {
         SimpleForm form = SimpleForm.builder()
                 .title(title)
                 .content(content)
-                .button(d.dismissLabel())
+                .button(plain(d.dismissLabel()))
                 .validResultHandler((form2, response) -> d.onDismiss().accept(player))
                 .closedOrInvalidResultHandler(() -> d.onClose().accept(player))
                 .build();
@@ -93,7 +93,7 @@ public class GeyserDialogPlatform implements DialogPlatform {
 
         List<MultiButtonDialog.DialogButton> buttons = d.buttons();
         for (MultiButtonDialog.DialogButton btn : buttons) {
-            builder.button(btn.label());
+            builder.button(plain(btn.label()));
         }
 
         SimpleForm form = builder

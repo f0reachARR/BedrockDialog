@@ -30,7 +30,7 @@ public non-sealed interface InputDialog extends UnifiedDialog {
 
     List<DialogInput> inputs();
 
-    String submitLabel();
+    Component submitLabel();
 
     BiConsumer<Player, InputResponse> onSubmit();
 
@@ -48,7 +48,7 @@ public non-sealed interface InputDialog extends UnifiedDialog {
         private Component title = Component.empty();
         private @Nullable Component body = null;
         private final List<DialogInput> inputs = new ArrayList<>();
-        private String submitLabel = "Submit";
+        private Component submitLabel = Component.text("Submit");
         private BiConsumer<Player, InputResponse> onSubmit = (p, r) -> {};
         private Consumer<Player> onClose = p -> {};
 
@@ -69,7 +69,7 @@ public non-sealed interface InputDialog extends UnifiedDialog {
             return this;
         }
 
-        public Builder submitLabel(String submitLabel) {
+        public Builder submitLabel(Component submitLabel) {
             this.submitLabel = submitLabel;
             return this;
         }
@@ -95,14 +95,14 @@ public non-sealed interface InputDialog extends UnifiedDialog {
             final Component t = title;
             final @Nullable Component b = body;
             final List<DialogInput> ins = Collections.unmodifiableList(new ArrayList<>(inputs));
-            final String sl = submitLabel;
+            final Component sl = submitLabel;
             final BiConsumer<Player, InputResponse> submit = onSubmit;
             final Consumer<Player> close = onClose;
             return new InputDialog() {
                 @Override public Component title() { return t; }
                 @Override public @Nullable Component body() { return b; }
                 @Override public List<DialogInput> inputs() { return ins; }
-                @Override public String submitLabel() { return sl; }
+                @Override public Component submitLabel() { return sl; }
                 @Override public BiConsumer<Player, InputResponse> onSubmit() { return submit; }
                 @Override public Consumer<Player> onClose() { return close; }
             };

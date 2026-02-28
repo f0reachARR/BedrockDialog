@@ -45,7 +45,7 @@ public class PaperDialogPlatform implements DialogPlatform {
 
     @Override
     public void showConfirmDialog(Player player, ConfirmDialog d) {
-        ActionButton yesBtn = ActionButton.builder(Component.text(d.yesLabel()))
+        ActionButton yesBtn = ActionButton.builder(d.yesLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
                             if (audience instanceof Player p) d.onYes().accept(p);
@@ -54,7 +54,7 @@ public class PaperDialogPlatform implements DialogPlatform {
                 ))
                 .build();
 
-        ActionButton noBtn = ActionButton.builder(Component.text(d.noLabel()))
+        ActionButton noBtn = ActionButton.builder(d.noLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
                             if (audience instanceof Player p) d.onNo().accept(p);
@@ -72,7 +72,7 @@ public class PaperDialogPlatform implements DialogPlatform {
 
     @Override
     public void showNoticeDialog(Player player, NoticeDialog d) {
-        ActionButton dismissBtn = ActionButton.builder(Component.text(d.dismissLabel()))
+        ActionButton dismissBtn = ActionButton.builder(d.dismissLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
                             if (audience instanceof Player p) d.onDismiss().accept(p);
@@ -92,7 +92,7 @@ public class PaperDialogPlatform implements DialogPlatform {
     public void showMultiButtonDialog(Player player, MultiButtonDialog d) {
         List<ActionButton> buttons = new ArrayList<>();
         for (MultiButtonDialog.DialogButton btn : d.buttons()) {
-            buttons.add(ActionButton.builder(Component.text(btn.label()))
+            buttons.add(ActionButton.builder(btn.label())
                     .action(DialogAction.customClick(
                             (response, audience) -> {
                                 if (audience instanceof Player p) btn.onClick().accept(p);
@@ -114,7 +114,7 @@ public class PaperDialogPlatform implements DialogPlatform {
     public void showInputDialog(Player player, InputDialog d) {
         List<DialogInput> paperInputs = toPaperInputs(d);
 
-        ActionButton submitBtn = ActionButton.builder(Component.text(d.submitLabel()))
+        ActionButton submitBtn = ActionButton.builder(d.submitLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
                             if (!(audience instanceof Player p)) return;

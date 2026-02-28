@@ -21,9 +21,9 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
 
     @Nullable Component body();
 
-    String yesLabel();
+    Component yesLabel();
 
-    String noLabel();
+    Component noLabel();
 
     Consumer<Player> onYes();
 
@@ -42,8 +42,8 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
     final class Builder {
         private Component title = Component.empty();
         private @Nullable Component body = null;
-        private String yesLabel = "Yes";
-        private String noLabel = "No";
+        private Component yesLabel = Component.text("Yes");
+        private Component noLabel = Component.text("No");
         private Consumer<Player> onYes = p -> {};
         private Consumer<Player> onNo = p -> {};
         private Consumer<Player> onClose = p -> {};
@@ -60,12 +60,12 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
             return this;
         }
 
-        public Builder yesLabel(String yesLabel) {
+        public Builder yesLabel(Component yesLabel) {
             this.yesLabel = yesLabel;
             return this;
         }
 
-        public Builder noLabel(String noLabel) {
+        public Builder noLabel(Component noLabel) {
             this.noLabel = noLabel;
             return this;
         }
@@ -88,16 +88,16 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
         public ConfirmDialog build() {
             final Component t = title;
             final @Nullable Component b = body;
-            final String yl = yesLabel;
-            final String nl = noLabel;
+            final Component yl = yesLabel;
+            final Component nl = noLabel;
             final Consumer<Player> yes = onYes;
             final Consumer<Player> no = onNo;
             final Consumer<Player> close = onClose;
             return new ConfirmDialog() {
                 @Override public Component title() { return t; }
                 @Override public @Nullable Component body() { return b; }
-                @Override public String yesLabel() { return yl; }
-                @Override public String noLabel() { return nl; }
+                @Override public Component yesLabel() { return yl; }
+                @Override public Component noLabel() { return nl; }
                 @Override public Consumer<Player> onYes() { return yes; }
                 @Override public Consumer<Player> onNo() { return no; }
                 @Override public Consumer<Player> onClose() { return close; }
