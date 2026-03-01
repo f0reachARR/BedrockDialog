@@ -17,23 +17,31 @@ import org.bukkit.entity.Player;
 import org.geysermc.cumulus.form.CustomForm;
 import org.geysermc.cumulus.form.ModalForm;
 import org.geysermc.cumulus.form.SimpleForm;
-import org.geysermc.geyser.api.GeyserApi;
 
 import java.util.List;
 
 /**
  * Geyser/Bedrock implementation of {@link DialogPlatform}.
  *
- * <p>Uses Cumulus forms to display UI to Bedrock players.</p>
+ * <p>
+ * Uses Cumulus forms to display UI to Bedrock players.
+ * </p>
  *
- * <p><b>Component serialization note:</b> Bedrock Edition renders plain text only;
- * Adventure formatting codes (color, bold, etc.) are stripped.</p>
+ * <p>
+ * <b>Component serialization note:</b> Bedrock Edition renders plain text only;
+ * Adventure formatting codes (color, bold, etc.) are stripped.
+ * </p>
  *
- * <p><b>SliderInput step note:</b> Bedrock requires integer step values.
- * Float step values are rounded to the nearest integer (minimum 1).</p>
+ * <p>
+ * <b>SliderInput step note:</b> Bedrock requires integer step values.
+ * Float step values are rounded to the nearest integer (minimum 1).
+ * </p>
  *
- * <p><b>Thread note:</b> Callbacks are invoked on a network thread.
- * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} for Bukkit API calls.</p>
+ * <p>
+ * <b>Thread note:</b> Callbacks are invoked on a network thread.
+ * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} for Bukkit API
+ * calls.
+ * </p>
  */
 public class GeyserDialogPlatform implements DialogPlatform {
 
@@ -63,7 +71,7 @@ public class GeyserDialogPlatform implements DialogPlatform {
                 .closedOrInvalidResultHandler(() -> d.onClose().accept(player))
                 .build();
 
-        GeyserApi.api().sendForm(player.getUniqueId(), form);
+        GeyserApiWrapper.sendFormToPlayer(player, form);
     }
 
     @Override
@@ -79,7 +87,7 @@ public class GeyserDialogPlatform implements DialogPlatform {
                 .closedOrInvalidResultHandler(() -> d.onClose().accept(player))
                 .build();
 
-        GeyserApi.api().sendForm(player.getUniqueId(), form);
+        GeyserApiWrapper.sendFormToPlayer(player, form);
     }
 
     @Override
@@ -106,7 +114,7 @@ public class GeyserDialogPlatform implements DialogPlatform {
                 .closedOrInvalidResultHandler(() -> d.onClose().accept(player))
                 .build();
 
-        GeyserApi.api().sendForm(player.getUniqueId(), form);
+        GeyserApiWrapper.sendFormToPlayer(player, form);
     }
 
     @Override
@@ -175,6 +183,6 @@ public class GeyserDialogPlatform implements DialogPlatform {
                 .closedOrInvalidResultHandler(() -> d.onClose().accept(player))
                 .build();
 
-        GeyserApi.api().sendForm(player.getUniqueId(), form);
+        GeyserApiWrapper.sendFormToPlayer(player, form);
     }
 }

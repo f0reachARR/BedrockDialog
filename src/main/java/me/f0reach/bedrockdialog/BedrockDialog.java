@@ -6,6 +6,7 @@ import me.f0reach.bedrockdialog.dialog.MultiButtonDialog;
 import me.f0reach.bedrockdialog.dialog.NoticeDialog;
 import me.f0reach.bedrockdialog.dialog.UnifiedDialog;
 import me.f0reach.bedrockdialog.platform.DialogPlatform;
+import me.f0reach.bedrockdialog.platform.geyser.GeyserApiWrapper;
 import me.f0reach.bedrockdialog.platform.geyser.GeyserDialogPlatform;
 import me.f0reach.bedrockdialog.platform.paper.PaperDialogPlatform;
 import org.bukkit.Bukkit;
@@ -19,18 +20,28 @@ import java.util.logging.Logger;
 /**
  * Entry point for BedrockDialog.
  *
- * <p>Call {@link #init(Plugin)} in your plugin's {@code onEnable()}, then use
- * {@link #get()} to obtain the singleton and {@link #show(Player, UnifiedDialog)} to
- * display dialogs to players.</p>
+ * <p>
+ * Call {@link #init(Plugin)} in your plugin's {@code onEnable()}, then use
+ * {@link #get()} to obtain the singleton and
+ * {@link #show(Player, UnifiedDialog)} to
+ * display dialogs to players.
+ * </p>
  *
  * <h2>Threading</h2>
- * <p>Dialog callbacks may arrive on a network thread (not the main server thread).
- * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} when calling Bukkit API
- * inside any callback.</p>
+ * <p>
+ * Dialog callbacks may arrive on a network thread (not the main server thread).
+ * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} when calling
+ * Bukkit API
+ * inside any callback.
+ * </p>
  *
  * <h2>Geyser support</h2>
- * <p>If Geyser is not installed, dialogs will only be shown to Java Edition players.
- * Bedrock players who connect without Geyser will see nothing (with a warning logged).</p>
+ * <p>
+ * If Geyser is not installed, dialogs will only be shown to Java Edition
+ * players.
+ * Bedrock players who connect without Geyser will see nothing (with a warning
+ * logged).
+ * </p>
  */
 public final class BedrockDialog {
 
@@ -55,14 +66,16 @@ public final class BedrockDialog {
      */
     public static void init(Plugin plugin) {
         if (instance != null) {
-            plugin.getLogger().warning("[BedrockDialog] Already initialized — ignoring duplicate init() call. Use BedrockDialog.get() instead.");
+            plugin.getLogger().warning(
+                    "[BedrockDialog] Already initialized — ignoring duplicate init() call. Use BedrockDialog.get() instead.");
             return;
         }
         instance = new BedrockDialog(plugin);
     }
 
     /**
-     * Resets the singleton instance, allowing a subsequent {@link #init(Plugin)} call.
+     * Resets the singleton instance, allowing a subsequent {@link #init(Plugin)}
+     * call.
      * Should be called in {@code onDisable()} by the owning plugin.
      */
     public static void reset() {
@@ -77,7 +90,8 @@ public final class BedrockDialog {
     public static BedrockDialog get() {
         BedrockDialog inst = instance;
         if (inst == null) {
-            throw new IllegalStateException("BedrockDialog has not been initialized. Call BedrockDialog.init(plugin) in onEnable()");
+            throw new IllegalStateException(
+                    "BedrockDialog has not been initialized. Call BedrockDialog.init(plugin) in onEnable()");
         }
         return inst;
     }
@@ -92,56 +106,37 @@ public final class BedrockDialog {
     public void show(Player player, UnifiedDialog dialog) {
         DialogPlatform platform = resolvePlatform(player);
         switch (dialog) {
-            case ConfirmDialog     d -> platform.showConfirmDialog(player, d);
-            case NoticeDialog      d -> platform.showNoticeDialog(player, d);
+            case ConfirmDialog d -> platform.showConfirmDialog(player, d);
+            case NoticeDialog d -> platform.showNoticeDialog(player, d);
             case MultiButtonDialog d -> platform.showMultiButtonDialog(player, d);
-            case InputDialog       d -> platform.showInputDialog(player, d);
+            case InputDialog d -> platform.showInputDialog(player, d);
         }
     }
 
     // ── Internal ─────────────────────────────────────────────────────────────
 
     private DialogPlatform resolvePlatform(Player player) {
-        if (bedrockPlatform != null && isBedrockPlayer(player)) {
+        if (bedrockPlatform != null && GeyserApiWrapper.isBedrockPlayer(player)) {
             return bedrockPlatform;
         }
         return javaPlatform;
-    }
-
-    private boolean isBedrockPlayer(Player player) {
-        try {
-            return org.geysermc.geyser.api.GeyserApi.api().isBedrockPlayer(player.getUniqueId());
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     /**
      * Attempts to create a {@link GeyserDialogPlatform}, returning {@code null} if
      * Geyser is not available on this server.
      *
-     * <p>Detection order:
+     * <p>
+     * Detection order:
      * <ol>
-     *   <li>PluginManager lookup for {@code Geyser-Spigot} or {@code Geyser-Paper}</li>
-     *   <li>Classpath check for {@code org.geysermc.geyser.api.GeyserApi}</li>
+     * <li>PluginManager lookup for {@code Geyser-Spigot} or
+     * {@code Geyser-Paper}</li>
+     * <li>Classpath check for {@code org.geysermc.geyser.api.GeyserApi}</li>
      * </ol>
      */
     private @Nullable DialogPlatform tryCreateGeyserPlatform() {
-        boolean geyserPresent =
-                Bukkit.getPluginManager().getPlugin("Geyser-Spigot") != null
-                || Bukkit.getPluginManager().getPlugin("Geyser-Paper") != null;
-
-        if (!geyserPresent) {
-            // Fallback: check classpath (e.g., shaded Geyser or non-standard plugin name)
-            try {
-                Class.forName("org.geysermc.geyser.api.GeyserApi");
-                geyserPresent = true;
-            } catch (ClassNotFoundException ignored) {
-                // Geyser is not available
-            }
-        }
-
-        if (geyserPresent) {
+        GeyserApiWrapper.init();
+        if (GeyserApiWrapper.isBedrockFormApiAvailable()) {
             logger.info("[BedrockDialog] Geyser detected — Bedrock Edition support enabled.");
             return new GeyserDialogPlatform();
         } else {

@@ -1,15 +1,18 @@
 name: BedrockDialog
-version: '${version}'
+version: "${version}"
 main: me.f0reach.bedrockdialog.BedrockDialogPlugin
-api-version: '1.21'
+api-version: "1.21"
 bootstrapper: me.f0reach.bedrockdialog.BedrockDialogBootstrap
-soft-dependencies:
-  - name: Geyser-Spigot
-    required: false
-    load: BEFORE
-  - name: Geyser-Paper
-    required: false
-    load: BEFORE
+dependencies:
+  server:
+    Geyser-Spigot:
+      required: false
+      load: BEFORE
+      join-classpath: true
+    floodgate:
+      required: false
+      load: BEFORE
+      join-classpath: true
 
 permissions:
   bedrockdialog.dialog.open:
