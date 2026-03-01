@@ -28,32 +28,31 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("UnstableApiUsage")
 public final class DialogCommand {
 
-    private DialogCommand() {}
+    private DialogCommand() {
+    }
 
     public static LiteralCommandNode<CommandSourceStack> build() {
-        return Commands.literal("dialog")
-            .then(Commands.literal("open")
-                .requires(s -> s.getSender().hasPermission("bedrockdialog.dialog.open"))
-                .then(Commands.argument("id", StringArgumentType.word())
-                    .suggests(DialogCommand::suggestDialogIds)
-                    .executes(DialogCommand::executeOpen)
-                )
-            )
-            .then(Commands.literal("reload")
-                .requires(s -> s.getSender().hasPermission("bedrockdialog.dialog.reload"))
-                .executes(DialogCommand::executeReload)
-            )
-            .build();
+        return Commands.literal("bdialog")
+                .then(Commands.literal("open")
+                        .requires(s -> s.getSender().hasPermission("bedrockdialog.dialog.open"))
+                        .then(Commands.argument("id", StringArgumentType.word())
+                                .suggests(DialogCommand::suggestDialogIds)
+                                .executes(DialogCommand::executeOpen)))
+                .then(Commands.literal("reload")
+                        .requires(s -> s.getSender().hasPermission("bedrockdialog.dialog.reload"))
+                        .executes(DialogCommand::executeReload))
+                .build();
     }
 
     private static CompletableFuture<Suggestions> suggestDialogIds(
             CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         BedrockDialogPlugin plugin = JavaPlugin.getPlugin(BedrockDialogPlugin.class);
-        if (plugin == null) return builder.buildFuture();
+        if (plugin == null)
+            return builder.buildFuture();
         String remaining = builder.getRemainingLowerCase();
         plugin.getConfigLoader().getDialogIds().stream()
-            .filter(id -> id.toLowerCase().startsWith(remaining))
-            .forEach(builder::suggest);
+                .filter(id -> id.toLowerCase().startsWith(remaining))
+                .forEach(builder::suggest);
         return builder.buildFuture();
     }
 
