@@ -185,4 +185,9 @@ public class GeyserDialogPlatform implements DialogPlatform {
 
         GeyserApiWrapper.sendFormToPlayer(player, form);
     }
+
+    @Override
+    public void closeDialog(Player player) {
+        GeyserApiWrapper.closeFormForPlayer(player);
+    }
 }

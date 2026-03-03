@@ -30,10 +30,20 @@ public class GeyserApiWrapper {
     }
 
     public static void sendFormToPlayer(Player player, Form form) {
-        if (isGeyserAvailable) {
-            GeyserApi.api().sendForm(player.getUniqueId(), form);
-        } else if (isFloodgateAvailable) {
+        if (isFloodgateAvailable) {
             FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
+        } else if (isGeyserAvailable) {
+            GeyserApi.api().sendForm(player.getUniqueId(), form);
+        } else {
+            throw new IllegalStateException("Neither Geyser nor Floodgate API is available");
+        }
+    }
+
+    public static void closeFormForPlayer(Player player) {
+        if (isFloodgateAvailable) {
+            FloodgateApi.getInstance().closeForm(player.getUniqueId());
+        } else if (isGeyserAvailable) {
+            // Geyser's API does not have a direct method to close forms
         } else {
             throw new IllegalStateException("Neither Geyser nor Floodgate API is available");
         }

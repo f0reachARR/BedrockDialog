@@ -15,4 +15,6 @@ public interface DialogPlatform {
     void showMultiButtonDialog(Player player, MultiButtonDialog dialog);
 
     void showInputDialog(Player player, InputDialog dialog);
+
+    void closeDialog(Player player);
 }

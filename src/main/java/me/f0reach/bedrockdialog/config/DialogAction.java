@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import me.f0reach.bedrockdialog.BedrockDialog;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,31 +18,37 @@ public sealed interface DialogAction permits
         DialogAction.OpenDialog {
 
     /** Executes a command as the player. */
-    record RunAsPlayer(String command) implements DialogAction {}
+    record RunAsPlayer(String command) implements DialogAction {
+    }
 
     /** Executes a command as the console. */
-    record RunAsConsole(String command) implements DialogAction {}
+    record RunAsConsole(String command) implements DialogAction {
+    }
 
     /** Opens another dialog by its config ID. */
-    record OpenDialog(String dialogId) implements DialogAction {}
+    record OpenDialog(String dialogId) implements DialogAction {
+    }
 
     /**
-     * Executes a list of actions for a non-input dialog (no {@code {input.*}} placeholders).
+     * Executes a list of actions for a non-input dialog (no {@code {input.*}}
+     * placeholders).
      */
     static void execute(List<DialogAction> actions, Player player, Plugin plugin,
-                        DialogConfigLoader loader) {
+            DialogConfigLoader loader) {
         execute(actions, player, plugin, loader, Map.of());
     }
 
     /**
-     * Executes a list of actions, substituting {@code {player}} and {@code {input.<key>}}
+     * Executes a list of actions, substituting {@code {player}} and
+     * {@code {input.<key>}}
      * placeholders in command strings.
      *
      * @param inputValues pre-resolved input values, keyed by input field key
      */
     static void execute(List<DialogAction> actions, Player player, Plugin plugin,
-                        DialogConfigLoader loader, Map<String, String> inputValues) {
-        if (actions.isEmpty()) return;
+            DialogConfigLoader loader, Map<String, String> inputValues) {
+        if (actions.isEmpty())
+            return;
         Bukkit.getScheduler().runTask(plugin, () -> {
             for (DialogAction action : actions) {
                 switch (action) {
@@ -48,10 +56,12 @@ public sealed interface DialogAction permits
                         player.performCommand(replace(a.command(), player, inputValues));
                     case RunAsConsole a ->
                         Bukkit.dispatchCommand(
-                            Bukkit.getConsoleSender(),
-                            replace(a.command(), player, inputValues));
-                    case OpenDialog a ->
+                                Bukkit.getConsoleSender(),
+                                replace(a.command(), player, inputValues));
+                    case OpenDialog a -> {
+                        BedrockDialog.get().closeDialog(player);
                         loader.openDialog(player, a.dialogId());
+                    }
                 }
             }
         });

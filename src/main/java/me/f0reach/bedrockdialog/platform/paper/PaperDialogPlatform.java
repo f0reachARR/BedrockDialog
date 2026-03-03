@@ -30,12 +30,19 @@ import java.util.List;
 /**
  * Paper (Java Edition) implementation of {@link DialogPlatform}.
  *
- * <p><b>Thread note:</b> Callbacks are invoked on the netty (network) thread.
- * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} for Bukkit API calls.</p>
+ * <p>
+ * <b>Thread note:</b> Callbacks are invoked on the netty (network) thread.
+ * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} for Bukkit API
+ * calls.
+ * </p>
  *
- * <p><b>onClose note:</b> Paper does not fire an event when a dialog is closed without
- * pressing a button, so {@link ConfirmDialog#onClose()} and {@link InputDialog#onClose()}
- * will not be called on Java Edition.</p>
+ * <p>
+ * <b>onClose note:</b> Paper does not fire an event when a dialog is closed
+ * without
+ * pressing a button, so {@link ConfirmDialog#onClose()} and
+ * {@link InputDialog#onClose()}
+ * will not be called on Java Edition.
+ * </p>
  */
 public class PaperDialogPlatform implements DialogPlatform {
 
@@ -48,25 +55,24 @@ public class PaperDialogPlatform implements DialogPlatform {
         ActionButton yesBtn = ActionButton.builder(d.yesLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
-                            if (audience instanceof Player p) d.onYes().accept(p);
+                            if (audience instanceof Player p)
+                                d.onYes().accept(p);
                         },
-                        CB_OPTIONS
-                ))
+                        CB_OPTIONS))
                 .build();
 
         ActionButton noBtn = ActionButton.builder(d.noLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
-                            if (audience instanceof Player p) d.onNo().accept(p);
+                            if (audience instanceof Player p)
+                                d.onNo().accept(p);
                         },
-                        CB_OPTIONS
-                ))
+                        CB_OPTIONS))
                 .build();
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), List.of()),
-                DialogType.confirmation(yesBtn, noBtn)
-        );
+                DialogType.confirmation(yesBtn, noBtn));
         player.showDialog(dialog);
     }
 
@@ -75,16 +81,15 @@ public class PaperDialogPlatform implements DialogPlatform {
         ActionButton dismissBtn = ActionButton.builder(d.dismissLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
-                            if (audience instanceof Player p) d.onDismiss().accept(p);
+                            if (audience instanceof Player p)
+                                d.onDismiss().accept(p);
                         },
-                        CB_OPTIONS
-                ))
+                        CB_OPTIONS))
                 .build();
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), List.of()),
-                DialogType.notice(dismissBtn)
-        );
+                DialogType.notice(dismissBtn));
         player.showDialog(dialog);
     }
 
@@ -95,18 +100,17 @@ public class PaperDialogPlatform implements DialogPlatform {
             buttons.add(ActionButton.builder(btn.label())
                     .action(DialogAction.customClick(
                             (response, audience) -> {
-                                if (audience instanceof Player p) btn.onClick().accept(p);
+                                if (audience instanceof Player p)
+                                    btn.onClick().accept(p);
                             },
-                            CB_OPTIONS
-                    ))
+                            CB_OPTIONS))
                     .build());
         }
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), List.of()),
                 // multiAction(List) returns MultiActionType.Builder; call build() to finalize
-                DialogType.multiAction(buttons).build()
-        );
+                DialogType.multiAction(buttons).build());
         player.showDialog(dialog);
     }
 
@@ -117,7 +121,8 @@ public class PaperDialogPlatform implements DialogPlatform {
         ActionButton submitBtn = ActionButton.builder(d.submitLabel())
                 .action(DialogAction.customClick(
                         (response, audience) -> {
-                            if (!(audience instanceof Player p)) return;
+                            if (!(audience instanceof Player p))
+                                return;
                             InputResponse.Builder builder = InputResponse.builder();
                             for (me.f0reach.bedrockdialog.input.DialogInput input : d.inputs()) {
                                 switch (input) {
@@ -136,7 +141,8 @@ public class PaperDialogPlatform implements DialogPlatform {
                                     case DropdownInput di2 -> {
                                         // Paper returns the selected option ID via getText(key)
                                         String selectedId = response.getText(di2.key());
-                                        if (selectedId == null) selectedId = "";
+                                        if (selectedId == null)
+                                            selectedId = "";
                                         int idx = -1;
                                         for (int i = 0; i < di2.options().size(); i++) {
                                             if (di2.options().get(i).id().equals(selectedId)) {
@@ -150,15 +156,18 @@ public class PaperDialogPlatform implements DialogPlatform {
                             }
                             d.onSubmit().accept(p, builder.build());
                         },
-                        CB_OPTIONS
-                ))
+                        CB_OPTIONS))
                 .build();
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), paperInputs),
-                DialogType.notice(submitBtn)
-        );
+                DialogType.notice(submitBtn));
         player.showDialog(dialog);
+    }
+
+    @Override
+    public void closeDialog(Player player) {
+        player.closeDialog();
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -176,11 +185,9 @@ public class PaperDialogPlatform implements DialogPlatform {
     }
 
     private Dialog buildDialog(DialogBase base, io.papermc.paper.registry.data.dialog.type.DialogType type) {
-        return Dialog.create(factory ->
-                factory.empty()
-                        .base(base)
-                        .type(type)
-        );
+        return Dialog.create(factory -> factory.empty()
+                .base(base)
+                .type(type));
     }
 
     private List<DialogInput> toPaperInputs(InputDialog d) {
@@ -196,8 +203,7 @@ public class PaperDialogPlatform implements DialogPlatform {
                     // Long factory: (key, width, label, labelFormat, start, end, initial, step)
                     result.add(DialogInput.numberRange(
                             si.key(), 200, si.label(), "options.generic_value",
-                            si.min(), si.max(), si.defaultValue(), si.step()
-                    ));
+                            si.min(), si.max(), si.defaultValue(), si.step()));
                 }
                 case BooleanInput bi -> {
                     result.add(DialogInput.bool(bi.key(), bi.label(), bi.defaultValue(), "true", "false"));

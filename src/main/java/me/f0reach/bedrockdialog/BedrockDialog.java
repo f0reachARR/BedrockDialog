@@ -113,6 +113,17 @@ public final class BedrockDialog {
         }
     }
 
+    /**
+     * Closes any open dialog for the given player, if supported by the platform.
+     * 
+     * @param player the player whose dialog should be closed
+     * @return
+     */
+    public void closeDialog(Player player) {
+        DialogPlatform platform = resolvePlatform(player);
+        platform.closeDialog(player);
+    }
+
     // ── Internal ─────────────────────────────────────────────────────────────
 
     private DialogPlatform resolvePlatform(Player player) {
