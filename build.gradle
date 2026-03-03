@@ -1,9 +1,10 @@
 plugins {
     id 'java'
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 group = 'me.f0reach.bedrockdialog'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 java {
     toolchain {
@@ -32,4 +33,14 @@ processResources {
     filesMatching("paper-plugin.yml") {
         expand(version: project.version)
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "bedrockdialog"
+    versionType = "release"
+    uploadFile = jar
+    gameVersions = ["1.21.8", "1.21.9", "1.21.10", "1.21.11"]
+    loaders = ["paper", "purpur"]
+    syncBodyFrom = rootProject.file("README.md").text
 }
