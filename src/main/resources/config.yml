@@ -1,69 +1,69 @@
 dialogs:
   welcome:
     type: multi_button
-    title: "ようこそ！"
-    body: "{player} さん、ようこそ"
+    title: "Welcome!"
+    body: "Welcome, <player>!"
     buttons:
-      - label: "スポーンへ"
+      - label: "Go to Spawn"
         actions:
           - type: run_as_player
             command: "spawn"
-      - label: "ルール確認"
+      - label: "Check Rules"
         actions:
-          - type: run_as_console
-            command: "tell {player} ルールを守ってね"
-      - label: "閉じる"
+          - type: open_dialog
+            dialog_id: "notice_rules"
+      - label: "Close"
         actions: []
 
   confirm_pvp:
     type: confirm
-    title: "PVPに参加しますか？"
-    body: "{player} さん、PVPに参加しますか？"
-    yes_label: "参加する"
-    no_label: "やめておく"
+    title: "Join PVP?"
+    body: "<player>, do you want to join PVP?"
+    yes_label: "Join"
+    no_label: "Cancel"
     on_yes:
       - type: run_as_console
-        command: "tell {player} PVPに参加しました"
+        command: "pvp join {player}"
     on_no: []
 
   notice_rules:
     type: notice
-    title: "サーバールール"
-    body: "1. 荒らし禁止\n2. チートツール禁止\n3. 楽しく遊ぼう！"
-    dismiss_label: "わかった"
+    title: "Server Rules"
+    body: "1. No griefing\n2. No cheating\n3. Have fun!"
+    dismiss_label: "Got it"
     on_dismiss: []
 
   item_form:
     type: input
-    title: "アイテム支給フォーム"
-    body: "支給する内容を選んでください"
-    submit_label: "送信"
+    title: "Item Distribution Form"
+    body: "Select what you want to receive"
+    submit_label: "Submit"
     inputs:
       - type: text
         key: player_name
-        label: "対象プレイヤー名"
-        placeholder: "例: Steve"
+        label: "Target Player Name"
+        placeholder: "e.g. Steve"
         default: ""
       - type: slider
         key: amount
-        label: "数量"
+        label: "Amount"
         min: 1
         max: 64
         step: 1
         default: 1
       - type: boolean
-        key: notify
-        label: "通知する"
+        key: checkbox
+        label: "Checkbox Test"
         default: true
       - type: dropdown
         key: item
-        label: "アイテム"
+        label: "Item"
         default: 0
         options:
           - id: diamond
-            label: "ダイヤモンド"
+            label: "Diamond"
           - id: gold_ingot
-            label: "金インゴット"
+            label: "Gold Ingot"
     on_submit:
       - type: run_as_console
         command: "give {input.player_name} {input.item} {input.amount}"
