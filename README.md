@@ -20,10 +20,10 @@ The plugin ships with a built-in command and `config.yml` for testing dialogs wi
 
 ### Commands
 
-| Command               | Description                       | Permission                      |
-|-----------------------|-----------------------------------|---------------------------------|
-| `/bdialog open <id>`  | Open a dialog defined in config   | `bedrockdialog.dialog.open`     |
-| `/bdialog reload`     | Reload `config.yml`               | `bedrockdialog.dialog.reload`   |
+| Command                        | Description                                | Permission                    |
+|--------------------------------|--------------------------------------------|-------------------------------|
+| `/bdialog open <id> [target]`  | Open a dialog for yourself or a target     | `bedrockdialog.dialog.open`   |
+| `/bdialog reload`              | Reload `config.yml`                        | `bedrockdialog.dialog.reload` |
 
 Both permissions default to **OP only**.
 
