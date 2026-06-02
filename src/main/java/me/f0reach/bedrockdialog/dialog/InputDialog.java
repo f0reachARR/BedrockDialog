@@ -17,20 +17,29 @@ import java.util.function.Consumer;
 /**
  * A form-style dialog with multiple typed input fields.
  *
- * <p><b>Thread note:</b> Callbacks may be invoked on a network thread (not the main server thread).
- * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} for any Bukkit API calls inside callbacks.</p>
+ * <p>
+ * <b>Thread note:</b> Callbacks may be invoked on a network thread (not the
+ * main server thread).
+ * Use {@code Bukkit.getScheduler().runTask(plugin, runnable)} for any Bukkit
+ * API calls inside callbacks.
+ * </p>
  *
- * <p><b>onClose note:</b> Best-effort. May not fire on Paper (Java Edition).</p>
+ * <p>
+ * <b>onClose note:</b> Best-effort. May not fire on Paper (Java Edition).
+ * </p>
  */
 public non-sealed interface InputDialog extends UnifiedDialog {
 
     Component title();
 
-    @Nullable Component body();
+    @Nullable
+    Component body();
 
     List<DialogInput> inputs();
 
     Component submitLabel();
+
+    Component cancelLabel();
 
     BiConsumer<Player, InputResponse> onSubmit();
 
@@ -49,10 +58,14 @@ public non-sealed interface InputDialog extends UnifiedDialog {
         private @Nullable Component body = null;
         private final List<DialogInput> inputs = new ArrayList<>();
         private Component submitLabel = Component.text("Submit");
-        private BiConsumer<Player, InputResponse> onSubmit = (p, r) -> {};
-        private Consumer<Player> onClose = p -> {};
+        private Component cancelLabel = Component.text("Cancel");
+        private BiConsumer<Player, InputResponse> onSubmit = (p, r) -> {
+        };
+        private Consumer<Player> onClose = p -> {
+        };
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder title(Component title) {
             this.title = title;
@@ -71,6 +84,11 @@ public non-sealed interface InputDialog extends UnifiedDialog {
 
         public Builder submitLabel(Component submitLabel) {
             this.submitLabel = submitLabel;
+            return this;
+        }
+
+        public Builder cancelLabel(Component cancelLabel) {
+            this.cancelLabel = cancelLabel;
             return this;
         }
 
@@ -96,15 +114,44 @@ public non-sealed interface InputDialog extends UnifiedDialog {
             final @Nullable Component b = body;
             final List<DialogInput> ins = Collections.unmodifiableList(new ArrayList<>(inputs));
             final Component sl = submitLabel;
+            final Component cl = cancelLabel;
             final BiConsumer<Player, InputResponse> submit = onSubmit;
             final Consumer<Player> close = onClose;
             return new InputDialog() {
-                @Override public Component title() { return t; }
-                @Override public @Nullable Component body() { return b; }
-                @Override public List<DialogInput> inputs() { return ins; }
-                @Override public Component submitLabel() { return sl; }
-                @Override public BiConsumer<Player, InputResponse> onSubmit() { return submit; }
-                @Override public Consumer<Player> onClose() { return close; }
+                @Override
+                public Component title() {
+                    return t;
+                }
+
+                @Override
+                public @Nullable Component body() {
+                    return b;
+                }
+
+                @Override
+                public List<DialogInput> inputs() {
+                    return ins;
+                }
+
+                @Override
+                public Component submitLabel() {
+                    return sl;
+                }
+
+                @Override
+                public Component cancelLabel() {
+                    return cl;
+                }
+
+                @Override
+                public BiConsumer<Player, InputResponse> onSubmit() {
+                    return submit;
+                }
+
+                @Override
+                public Consumer<Player> onClose() {
+                    return close;
+                }
             };
         }
     }

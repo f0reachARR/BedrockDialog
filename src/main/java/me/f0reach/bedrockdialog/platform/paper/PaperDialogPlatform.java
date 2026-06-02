@@ -159,9 +159,18 @@ public class PaperDialogPlatform implements DialogPlatform {
                         CB_OPTIONS))
                 .build();
 
+        ActionButton cancelBtn = ActionButton.builder(d.cancelLabel())
+                .action(DialogAction.customClick(
+                        (response, audience) -> {
+                            if (audience instanceof Player p)
+                                d.onClose().accept(p);
+                        },
+                        CB_OPTIONS))
+                .build();
+
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), paperInputs),
-                DialogType.notice(submitBtn));
+                DialogType.confirmation(submitBtn, cancelBtn));
         player.showDialog(dialog);
     }
 
@@ -176,7 +185,7 @@ public class PaperDialogPlatform implements DialogPlatform {
         DialogBase.Builder builder = DialogBase.builder(title);
         if (body != null) {
             // NOTE: DialogBody.plainText(Component) — adjust if API differs
-            builder.body(List.of(DialogBody.plainMessage(body)));
+            builder.body(List.of(DialogBody.plainMessage(body, 250)));
         }
         if (!inputs.isEmpty()) {
             builder.inputs(inputs);
@@ -197,7 +206,7 @@ public class PaperDialogPlatform implements DialogPlatform {
                 case TextInput ti -> {
                     // Short factory: DialogInput.text(key, label) — may return builder or instance
                     // NOTE: adjust if .build() is required or more params are needed
-                    result.add(DialogInput.text(ti.key(), ti.label()).build());
+                    result.add(DialogInput.text(ti.key(), ti.label()).initial(ti.defaultValue()).build());
                 }
                 case SliderInput si -> {
                     // Long factory: (key, width, label, labelFormat, start, end, initial, step)
