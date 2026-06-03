@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'me.f0reach.bedrockdialog'
-version = '1.0.0'
+version = providers.gradleProperty("version").getOrElse('1.0.0')
 
 java {
     toolchain {
@@ -38,9 +38,14 @@ processResources {
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "bedrockdialog"
+    versionNumber = project.version
     versionType = "release"
     uploadFile = jar
     gameVersions = ["1.21.8", "1.21.9", "1.21.10", "1.21.11"]
     loaders = ["paper", "purpur"]
     syncBodyFrom = rootProject.file("README.md").text
+    def releaseChangelog = System.getenv("RELEASE_CHANGELOG")
+    if (releaseChangelog != null && !releaseChangelog.isEmpty()) {
+        changelog = releaseChangelog
+    }
 }
