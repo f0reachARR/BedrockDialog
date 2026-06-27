@@ -25,6 +25,18 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
 
     Component noLabel();
 
+    /**
+     * Desired width of the Yes button on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    @Nullable Integer yesWidth();
+
+    /**
+     * Desired width of the No button on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    @Nullable Integer noWidth();
+
     Consumer<Player> onYes();
 
     Consumer<Player> onNo();
@@ -44,6 +56,8 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
         private @Nullable Component body = null;
         private Component yesLabel = Component.text("Yes");
         private Component noLabel = Component.text("No");
+        private @Nullable Integer yesWidth = null;
+        private @Nullable Integer noWidth = null;
         private Consumer<Player> onYes = p -> {};
         private Consumer<Player> onNo = p -> {};
         private Consumer<Player> onClose = p -> {};
@@ -70,6 +84,32 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
             return this;
         }
 
+        /**
+         * Sets the desired width of the Yes button on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder yesWidth(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.yesWidth = width;
+            return this;
+        }
+
+        /**
+         * Sets the desired width of the No button on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder noWidth(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.noWidth = width;
+            return this;
+        }
+
         public Builder onYes(Consumer<Player> onYes) {
             this.onYes = onYes;
             return this;
@@ -90,6 +130,8 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
             final @Nullable Component b = body;
             final Component yl = yesLabel;
             final Component nl = noLabel;
+            final @Nullable Integer yw = yesWidth;
+            final @Nullable Integer nw = noWidth;
             final Consumer<Player> yes = onYes;
             final Consumer<Player> no = onNo;
             final Consumer<Player> close = onClose;
@@ -98,6 +140,8 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
                 @Override public @Nullable Component body() { return b; }
                 @Override public Component yesLabel() { return yl; }
                 @Override public Component noLabel() { return nl; }
+                @Override public @Nullable Integer yesWidth() { return yw; }
+                @Override public @Nullable Integer noWidth() { return nw; }
                 @Override public Consumer<Player> onYes() { return yes; }
                 @Override public Consumer<Player> onNo() { return no; }
                 @Override public Consumer<Player> onClose() { return close; }

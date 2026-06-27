@@ -4,6 +4,7 @@ import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
@@ -18,7 +19,6 @@ import me.f0reach.bedrockdialog.input.SliderInput;
 import me.f0reach.bedrockdialog.input.TextInput;
 import me.f0reach.bedrockdialog.platform.DialogPlatform;
 import me.f0reach.bedrockdialog.response.InputResponse;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
 import org.bukkit.entity.Player;
@@ -52,23 +52,17 @@ public class PaperDialogPlatform implements DialogPlatform {
 
     @Override
     public void showConfirmDialog(Player player, ConfirmDialog d) {
-        ActionButton yesBtn = ActionButton.builder(d.yesLabel())
-                .action(DialogAction.customClick(
-                        (response, audience) -> {
-                            if (audience instanceof Player p)
-                                d.onYes().accept(p);
-                        },
-                        CB_OPTIONS))
-                .build();
+        ActionButton yesBtn = button(d.yesLabel(), d.yesWidth(),
+                (response, audience) -> {
+                    if (audience instanceof Player p)
+                        d.onYes().accept(p);
+                });
 
-        ActionButton noBtn = ActionButton.builder(d.noLabel())
-                .action(DialogAction.customClick(
-                        (response, audience) -> {
-                            if (audience instanceof Player p)
-                                d.onNo().accept(p);
-                        },
-                        CB_OPTIONS))
-                .build();
+        ActionButton noBtn = button(d.noLabel(), d.noWidth(),
+                (response, audience) -> {
+                    if (audience instanceof Player p)
+                        d.onNo().accept(p);
+                });
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), List.of()),
@@ -78,14 +72,11 @@ public class PaperDialogPlatform implements DialogPlatform {
 
     @Override
     public void showNoticeDialog(Player player, NoticeDialog d) {
-        ActionButton dismissBtn = ActionButton.builder(d.dismissLabel())
-                .action(DialogAction.customClick(
-                        (response, audience) -> {
-                            if (audience instanceof Player p)
-                                d.onDismiss().accept(p);
-                        },
-                        CB_OPTIONS))
-                .build();
+        ActionButton dismissBtn = button(d.dismissLabel(), d.dismissWidth(),
+                (response, audience) -> {
+                    if (audience instanceof Player p)
+                        d.onDismiss().accept(p);
+                });
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), List.of()),
@@ -97,14 +88,11 @@ public class PaperDialogPlatform implements DialogPlatform {
     public void showMultiButtonDialog(Player player, MultiButtonDialog d) {
         List<ActionButton> buttons = new ArrayList<>();
         for (MultiButtonDialog.DialogButton btn : d.buttons()) {
-            buttons.add(ActionButton.builder(btn.label())
-                    .action(DialogAction.customClick(
-                            (response, audience) -> {
-                                if (audience instanceof Player p)
-                                    btn.onClick().accept(p);
-                            },
-                            CB_OPTIONS))
-                    .build());
+            buttons.add(button(btn.label(), btn.width(),
+                    (response, audience) -> {
+                        if (audience instanceof Player p)
+                            btn.onClick().accept(p);
+                    }));
         }
 
         Dialog dialog = buildDialog(
@@ -118,55 +106,49 @@ public class PaperDialogPlatform implements DialogPlatform {
     public void showInputDialog(Player player, InputDialog d) {
         List<DialogInput> paperInputs = toPaperInputs(d);
 
-        ActionButton submitBtn = ActionButton.builder(d.submitLabel())
-                .action(DialogAction.customClick(
-                        (response, audience) -> {
-                            if (!(audience instanceof Player p))
-                                return;
-                            InputResponse.Builder builder = InputResponse.builder();
-                            for (me.f0reach.bedrockdialog.input.DialogInput input : d.inputs()) {
-                                switch (input) {
-                                    case TextInput ti -> {
-                                        String val = response.getText(ti.key());
-                                        builder.putText(ti.key(), val != null ? val : "");
-                                    }
-                                    case SliderInput si -> {
-                                        Float val = response.getFloat(si.key());
-                                        builder.putFloat(si.key(), val != null ? val : si.defaultValue());
-                                    }
-                                    case BooleanInput bi -> {
-                                        Boolean val = response.getBoolean(bi.key());
-                                        builder.putBoolean(bi.key(), val != null ? val : bi.defaultValue());
-                                    }
-                                    case DropdownInput di2 -> {
-                                        // Paper returns the selected option ID via getText(key)
-                                        String selectedId = response.getText(di2.key());
-                                        if (selectedId == null)
-                                            selectedId = "";
-                                        int idx = -1;
-                                        for (int i = 0; i < di2.options().size(); i++) {
-                                            if (di2.options().get(i).id().equals(selectedId)) {
-                                                idx = i;
-                                                break;
-                                            }
-                                        }
-                                        builder.putDropdown(di2.key(), selectedId, idx);
+        ActionButton submitBtn = button(d.submitLabel(), d.submitWidth(),
+                (response, audience) -> {
+                    if (!(audience instanceof Player p))
+                        return;
+                    InputResponse.Builder builder = InputResponse.builder();
+                    for (me.f0reach.bedrockdialog.input.DialogInput input : d.inputs()) {
+                        switch (input) {
+                            case TextInput ti -> {
+                                String val = response.getText(ti.key());
+                                builder.putText(ti.key(), val != null ? val : "");
+                            }
+                            case SliderInput si -> {
+                                Float val = response.getFloat(si.key());
+                                builder.putFloat(si.key(), val != null ? val : si.defaultValue());
+                            }
+                            case BooleanInput bi -> {
+                                Boolean val = response.getBoolean(bi.key());
+                                builder.putBoolean(bi.key(), val != null ? val : bi.defaultValue());
+                            }
+                            case DropdownInput di2 -> {
+                                // Paper returns the selected option ID via getText(key)
+                                String selectedId = response.getText(di2.key());
+                                if (selectedId == null)
+                                    selectedId = "";
+                                int idx = -1;
+                                for (int i = 0; i < di2.options().size(); i++) {
+                                    if (di2.options().get(i).id().equals(selectedId)) {
+                                        idx = i;
+                                        break;
                                     }
                                 }
+                                builder.putDropdown(di2.key(), selectedId, idx);
                             }
-                            d.onSubmit().accept(p, builder.build());
-                        },
-                        CB_OPTIONS))
-                .build();
+                        }
+                    }
+                    d.onSubmit().accept(p, builder.build());
+                });
 
-        ActionButton cancelBtn = ActionButton.builder(d.cancelLabel())
-                .action(DialogAction.customClick(
-                        (response, audience) -> {
-                            if (audience instanceof Player p)
-                                d.onClose().accept(p);
-                        },
-                        CB_OPTIONS))
-                .build();
+        ActionButton cancelBtn = button(d.cancelLabel(), d.cancelWidth(),
+                (response, audience) -> {
+                    if (audience instanceof Player p)
+                        d.onClose().accept(p);
+                });
 
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), paperInputs),
@@ -180,6 +162,13 @@ public class PaperDialogPlatform implements DialogPlatform {
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private ActionButton button(Component label, @Nullable Integer width, DialogActionCallback onClick) {
+        ActionButton.Builder b = ActionButton.builder(label)
+                .action(DialogAction.customClick(onClick, CB_OPTIONS));
+        if (width != null) b.width(width);
+        return b.build();
+    }
 
     private DialogBase buildBase(Component title, @Nullable Component body, List<DialogInput> inputs) {
         DialogBase.Builder builder = DialogBase.builder(title);
@@ -204,14 +193,15 @@ public class PaperDialogPlatform implements DialogPlatform {
         for (me.f0reach.bedrockdialog.input.DialogInput input : d.inputs()) {
             switch (input) {
                 case TextInput ti -> {
-                    // Short factory: DialogInput.text(key, label) — may return builder or instance
-                    // NOTE: adjust if .build() is required or more params are needed
-                    result.add(DialogInput.text(ti.key(), ti.label()).initial(ti.defaultValue()).build());
+                    var builder = DialogInput.text(ti.key(), ti.label()).initial(ti.defaultValue());
+                    if (ti.width() != null) builder.width(ti.width());
+                    result.add(builder.build());
                 }
                 case SliderInput si -> {
                     // Long factory: (key, width, label, labelFormat, start, end, initial, step)
+                    int width = si.width() != null ? si.width() : 200;
                     result.add(DialogInput.numberRange(
-                            si.key(), 200, si.label(), "options.generic_value",
+                            si.key(), width, si.label(), "options.generic_value",
                             si.min(), si.max(), si.defaultValue(), si.step()));
                 }
                 case BooleanInput bi -> {
@@ -224,7 +214,8 @@ public class PaperDialogPlatform implements DialogPlatform {
                         entries.add(SingleOptionDialogInput.OptionEntry.create(
                                 opt.id(), opt.label(), i == di.defaultIndex()));
                     }
-                    result.add(DialogInput.singleOption(di.key(), 200, entries, di.label(), true));
+                    int width = di.width() != null ? di.width() : 200;
+                    result.add(DialogInput.singleOption(di.key(), width, entries, di.label(), true));
                 }
             }
         }

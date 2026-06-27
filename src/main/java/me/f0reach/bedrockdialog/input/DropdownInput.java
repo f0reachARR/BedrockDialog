@@ -1,6 +1,7 @@
 package me.f0reach.bedrockdialog.input;
 
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,12 +21,14 @@ public final class DropdownInput implements DialogInput {
     private final Component label;
     private final List<DropdownOption> options;
     private final int defaultIndex;
+    private final @Nullable Integer width;
 
     private DropdownInput(Builder builder) {
         this.key = builder.key;
         this.label = builder.label;
         this.options = Collections.unmodifiableList(new ArrayList<>(builder.options));
         this.defaultIndex = builder.defaultIndex;
+        this.width = builder.width;
     }
 
     @Override
@@ -46,6 +49,14 @@ public final class DropdownInput implements DialogInput {
         return defaultIndex;
     }
 
+    /**
+     * The desired width of this input on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    public @Nullable Integer width() {
+        return width;
+    }
+
     public static Builder builder(String key) {
         return new Builder(key);
     }
@@ -63,6 +74,7 @@ public final class DropdownInput implements DialogInput {
         private Component label = Component.empty();
         private final List<DropdownOption> options = new ArrayList<>();
         private int defaultIndex = 0;
+        private @Nullable Integer width = null;
 
         private Builder(String key) {
             this.key = key;
@@ -80,6 +92,19 @@ public final class DropdownInput implements DialogInput {
 
         public Builder defaultIndex(int defaultIndex) {
             this.defaultIndex = defaultIndex;
+            return this;
+        }
+
+        /**
+         * Sets the desired width of the input on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder width(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.width = width;
             return this;
         }
 

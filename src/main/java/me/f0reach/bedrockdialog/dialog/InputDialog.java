@@ -41,6 +41,20 @@ public non-sealed interface InputDialog extends UnifiedDialog {
 
     Component cancelLabel();
 
+    /**
+     * Desired width of the submit button on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    @Nullable
+    Integer submitWidth();
+
+    /**
+     * Desired width of the cancel button on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    @Nullable
+    Integer cancelWidth();
+
     BiConsumer<Player, InputResponse> onSubmit();
 
     /**
@@ -59,6 +73,8 @@ public non-sealed interface InputDialog extends UnifiedDialog {
         private final List<DialogInput> inputs = new ArrayList<>();
         private Component submitLabel = Component.text("Submit");
         private Component cancelLabel = Component.text("Cancel");
+        private @Nullable Integer submitWidth = null;
+        private @Nullable Integer cancelWidth = null;
         private BiConsumer<Player, InputResponse> onSubmit = (p, r) -> {
         };
         private Consumer<Player> onClose = p -> {
@@ -92,6 +108,32 @@ public non-sealed interface InputDialog extends UnifiedDialog {
             return this;
         }
 
+        /**
+         * Sets the desired width of the submit button on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder submitWidth(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.submitWidth = width;
+            return this;
+        }
+
+        /**
+         * Sets the desired width of the cancel button on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder cancelWidth(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.cancelWidth = width;
+            return this;
+        }
+
         public Builder onSubmit(BiConsumer<Player, InputResponse> onSubmit) {
             this.onSubmit = onSubmit;
             return this;
@@ -115,6 +157,8 @@ public non-sealed interface InputDialog extends UnifiedDialog {
             final List<DialogInput> ins = Collections.unmodifiableList(new ArrayList<>(inputs));
             final Component sl = submitLabel;
             final Component cl = cancelLabel;
+            final @Nullable Integer sw = submitWidth;
+            final @Nullable Integer cw = cancelWidth;
             final BiConsumer<Player, InputResponse> submit = onSubmit;
             final Consumer<Player> close = onClose;
             return new InputDialog() {
@@ -141,6 +185,16 @@ public non-sealed interface InputDialog extends UnifiedDialog {
                 @Override
                 public Component cancelLabel() {
                     return cl;
+                }
+
+                @Override
+                public @Nullable Integer submitWidth() {
+                    return sw;
+                }
+
+                @Override
+                public @Nullable Integer cancelWidth() {
+                    return cw;
                 }
 
                 @Override
