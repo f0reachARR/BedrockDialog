@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -101,6 +102,7 @@ public class DialogConfigLoader {
         String titleTpl = cfg.getString("title", "");
         String bodyTpl = cfg.getString("body");
         String dismissLabel = cfg.getString("dismiss_label", "OK");
+        @Nullable Integer dismissWidth = optionalWidth(cfg, "dismiss_width");
         List<DialogAction> onDismiss = parseActions(cfg.getMapList("on_dismiss"));
 
         return player -> {
@@ -109,6 +111,7 @@ public class DialogConfigLoader {
                 .dismissLabel(sub(dismissLabel, player))
                 .onDismiss(p -> DialogAction.execute(onDismiss, p, plugin, this));
             if (bodyTpl != null) b.body(sub(bodyTpl, player));
+            if (dismissWidth != null) b.dismissWidth(dismissWidth);
             return b.build();
         };
     }
@@ -118,6 +121,8 @@ public class DialogConfigLoader {
         String bodyTpl = cfg.getString("body");
         String yesLabel = cfg.getString("yes_label", "Yes");
         String noLabel = cfg.getString("no_label", "No");
+        @Nullable Integer yesWidth = optionalWidth(cfg, "yes_width");
+        @Nullable Integer noWidth = optionalWidth(cfg, "no_width");
         List<DialogAction> onYes = parseActions(cfg.getMapList("on_yes"));
         List<DialogAction> onNo = parseActions(cfg.getMapList("on_no"));
 
@@ -129,6 +134,8 @@ public class DialogConfigLoader {
                 .onYes(p -> DialogAction.execute(onYes, p, plugin, this))
                 .onNo(p -> DialogAction.execute(onNo, p, plugin, this));
             if (bodyTpl != null) b.body(sub(bodyTpl, player));
+            if (yesWidth != null) b.yesWidth(yesWidth);
+            if (noWidth != null) b.noWidth(noWidth);
             return b.build();
         };
     }
@@ -137,11 +144,12 @@ public class DialogConfigLoader {
         String titleTpl = cfg.getString("title", "");
         String bodyTpl = cfg.getString("body");
 
-        record ButtonSpec(String label, List<DialogAction> actions) {}
+        record ButtonSpec(String label, @Nullable Integer width, List<DialogAction> actions) {}
         List<ButtonSpec> buttons = new ArrayList<>();
         for (Map<?, ?> map : cfg.getMapList("buttons")) {
             String label = toString(mapGet(map, "label", ""));
-            buttons.add(new ButtonSpec(label, parseActions(nestedMapList(map, "actions"))));
+            @Nullable Integer width = optionalWidth(map, "width");
+            buttons.add(new ButtonSpec(label, width, parseActions(nestedMapList(map, "actions"))));
         }
 
         if (buttons.isEmpty()) {
@@ -153,7 +161,13 @@ public class DialogConfigLoader {
                 .title(sub(titleTpl, player));
             if (bodyTpl != null) b.body(sub(bodyTpl, player));
             for (ButtonSpec btn : buttons) {
-                b.button(sub(btn.label(), player), p -> DialogAction.execute(btn.actions(), p, plugin, this));
+                Component label = sub(btn.label(), player);
+                Consumer<Player> action = p -> DialogAction.execute(btn.actions(), p, plugin, this);
+                if (btn.width() != null) {
+                    b.button(label, btn.width(), action);
+                } else {
+                    b.button(label, action);
+                }
             }
             if (buttons.isEmpty()) b.button(sub("OK"), p -> {});
             return b.build();
@@ -164,6 +178,8 @@ public class DialogConfigLoader {
         String titleTpl = cfg.getString("title", "");
         String bodyTpl = cfg.getString("body");
         String submitLabel = cfg.getString("submit_label", "Submit");
+        @Nullable Integer submitWidth = optionalWidth(cfg, "submit_width");
+        @Nullable Integer cancelWidth = optionalWidth(cfg, "cancel_width");
         List<DialogAction> onSubmitActions = parseActions(cfg.getMapList("on_submit"));
         List<DialogAction> onCloseActions = parseActions(cfg.getMapList("on_close"));
 
@@ -178,6 +194,8 @@ public class DialogConfigLoader {
                 .title(sub(titleTpl, player))
                 .submitLabel(sub(submitLabel, player));
             if (bodyTpl != null) b.body(sub(bodyTpl, player));
+            if (submitWidth != null) b.submitWidth(submitWidth);
+            if (cancelWidth != null) b.cancelWidth(cancelWidth);
             for (InputSpec spec : specs) b.addInput(spec.buildInput());
             b.onSubmit((p, response) -> {
                 Map<String, String> inputValues = new LinkedHashMap<>();
@@ -203,22 +221,27 @@ public class DialogConfigLoader {
         String valueAsString(InputResponse response);
     }
 
-    private record TextSpec(String key, String label, String placeholder, String defaultValue)
+    private record TextSpec(String key, String label, String placeholder, String defaultValue,
+                            @Nullable Integer width)
             implements InputSpec {
         @Override public DialogInput buildInput() {
             TextInput.Builder b = TextInput.builder(key).label(sub(label));
             if (!placeholder.isEmpty()) b.placeholder(placeholder);
             if (!defaultValue.isEmpty()) b.defaultValue(defaultValue);
+            if (width != null) b.width(width);
             return b.build();
         }
         @Override public String valueAsString(InputResponse r) { return r.getText(key); }
     }
 
-    private record SliderSpec(String key, String label, float min, float max, float step, float defaultValue)
+    private record SliderSpec(String key, String label, float min, float max, float step, float defaultValue,
+                              @Nullable Integer width)
             implements InputSpec {
         @Override public DialogInput buildInput() {
-            return SliderInput.builder(key).label(sub(label))
-                .min(min).max(max).step(step).defaultValue(defaultValue).build();
+            SliderInput.Builder b = SliderInput.builder(key).label(sub(label))
+                .min(min).max(max).step(step).defaultValue(defaultValue);
+            if (width != null) b.width(width);
+            return b.build();
         }
         @Override public String valueAsString(InputResponse r) {
             float v = r.getFloat(key);
@@ -235,12 +258,13 @@ public class DialogConfigLoader {
     }
 
     private record DropdownSpec(String key, String label, int defaultIndex,
-                                List<DropdownInput.DropdownOption> options)
+                                List<DropdownInput.DropdownOption> options, @Nullable Integer width)
             implements InputSpec {
         @Override public DialogInput buildInput() {
             DropdownInput.Builder b = DropdownInput.builder(key)
                 .label(sub(label)).defaultIndex(defaultIndex);
             for (DropdownInput.DropdownOption opt : options) b.addOption(opt.id(), opt.label());
+            if (width != null) b.width(width);
             return b.build();
         }
         @Override public String valueAsString(InputResponse r) { return r.getDropdownOptionId(key); }
@@ -254,19 +278,22 @@ public class DialogConfigLoader {
             return null;
         }
         String label = toString(mapGet(map, "label", ""));
+        @Nullable Integer width = optionalWidth(map, "width");
 
         return switch (type == null ? "" : type) {
             case "text" -> new TextSpec(
                 key, label,
                 toString(mapGet(map, "placeholder", "")),
-                toString(mapGet(map, "default", ""))
+                toString(mapGet(map, "default", "")),
+                width
             );
             case "slider" -> new SliderSpec(
                 key, label,
                 toFloat(mapGet(map, "min", 0)),
                 toFloat(mapGet(map, "max", 100)),
                 toFloat(mapGet(map, "step", 1)),
-                toFloat(mapGet(map, "default", 0))
+                toFloat(mapGet(map, "default", 0)),
+                width
             );
             case "boolean" -> new BooleanSpec(
                 key, label,
@@ -278,7 +305,7 @@ public class DialogConfigLoader {
                         toString(m.get("id")),
                         sub(toString(mapGet(m, "label", "")))))
                     .toList();
-                yield new DropdownSpec(key, label, toInt(mapGet(map, "default", 0)), opts);
+                yield new DropdownSpec(key, label, toInt(mapGet(map, "default", 0)), opts, width);
             }
             default -> {
                 plugin.getLogger().warning("[BedrockDialog] Unknown input type '" + type + "' for key '" + key + "' — skipping.");
@@ -349,5 +376,26 @@ public class DialogConfigLoader {
     private static boolean toBool(Object obj) {
         if (obj instanceof Boolean b) return b;
         return false;
+    }
+
+    /** Returns the width value at {@code key}, or {@code null} if absent/invalid. */
+    private static @Nullable Integer optionalWidth(ConfigurationSection cfg, String key) {
+        if (!cfg.contains(key)) return null;
+        int width = cfg.getInt(key);
+        return validateWidth(width, key);
+    }
+
+    private static @Nullable Integer optionalWidth(Map<?, ?> map, String key) {
+        Object val = map.get(key);
+        if (!(val instanceof Number n)) return null;
+        return validateWidth(n.intValue(), key);
+    }
+
+    private static @Nullable Integer validateWidth(int width, String key) {
+        if (width < 1 || width > 1024) {
+            throw new IllegalArgumentException(
+                    "'" + key + "' must be between 1 and 1024, was " + width);
+        }
+        return width;
     }
 }

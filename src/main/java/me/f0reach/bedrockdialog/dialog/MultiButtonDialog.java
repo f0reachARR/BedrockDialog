@@ -36,8 +36,14 @@ public non-sealed interface MultiButtonDialog extends UnifiedDialog {
      *
      * @param label   Display label of the button
      * @param onClick Action to perform when the button is clicked
+     * @param width   Desired width on Java Edition (1-1024), or {@code null} for
+     *                the platform default. Ignored on Bedrock Edition.
      */
-    record DialogButton(Component label, Consumer<Player> onClick) {}
+    record DialogButton(Component label, Consumer<Player> onClick, @Nullable Integer width) {
+        public DialogButton(Component label, Consumer<Player> onClick) {
+            this(label, onClick, null);
+        }
+    }
 
     static Builder builder() {
         return new Builder();
@@ -62,7 +68,20 @@ public non-sealed interface MultiButtonDialog extends UnifiedDialog {
         }
 
         public Builder button(Component label, Consumer<Player> onClick) {
-            this.buttons.add(new DialogButton(label, onClick));
+            this.buttons.add(new DialogButton(label, onClick, null));
+            return this;
+        }
+
+        /**
+         * Adds a button with an explicit width on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder button(Component label, int width, Consumer<Player> onClick) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.buttons.add(new DialogButton(label, onClick, width));
             return this;
         }
 

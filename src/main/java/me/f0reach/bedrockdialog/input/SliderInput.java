@@ -1,6 +1,7 @@
 package me.f0reach.bedrockdialog.input;
 
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A slider (numeric range) input.
@@ -17,6 +18,7 @@ public final class SliderInput implements DialogInput {
     private final float max;
     private final float step;
     private final float defaultValue;
+    private final @Nullable Integer width;
 
     private SliderInput(Builder builder) {
         this.key = builder.key;
@@ -25,6 +27,7 @@ public final class SliderInput implements DialogInput {
         this.max = builder.max;
         this.step = builder.step;
         this.defaultValue = builder.defaultValue;
+        this.width = builder.width;
     }
 
     @Override
@@ -53,6 +56,14 @@ public final class SliderInput implements DialogInput {
         return defaultValue;
     }
 
+    /**
+     * The desired width of this input on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    public @Nullable Integer width() {
+        return width;
+    }
+
     public static Builder builder(String key) {
         return new Builder(key);
     }
@@ -64,6 +75,7 @@ public final class SliderInput implements DialogInput {
         private float max = 100f;
         private float step = 1f;
         private float defaultValue = 0f;
+        private @Nullable Integer width = null;
 
         private Builder(String key) {
             this.key = key;
@@ -91,6 +103,19 @@ public final class SliderInput implements DialogInput {
 
         public Builder defaultValue(float defaultValue) {
             this.defaultValue = defaultValue;
+            return this;
+        }
+
+        /**
+         * Sets the desired width of the input on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder width(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.width = width;
             return this;
         }
 

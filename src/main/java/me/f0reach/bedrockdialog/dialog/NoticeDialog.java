@@ -22,6 +22,12 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
 
     Component dismissLabel();
 
+    /**
+     * Desired width of the dismiss button on Java Edition (1-1024), or {@code null}
+     * to use the platform default. Ignored on Bedrock Edition.
+     */
+    @Nullable Integer dismissWidth();
+
     Consumer<Player> onDismiss();
 
     /**
@@ -38,6 +44,7 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
         private Component title = Component.empty();
         private @Nullable Component body = null;
         private Component dismissLabel = Component.text("OK");
+        private @Nullable Integer dismissWidth = null;
         private Consumer<Player> onDismiss = p -> {};
         private Consumer<Player> onClose = p -> {};
 
@@ -58,6 +65,19 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
             return this;
         }
 
+        /**
+         * Sets the desired width of the dismiss button on Java Edition.
+         *
+         * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         */
+        public Builder dismissWidth(int width) {
+            if (width < 1 || width > 1024) {
+                throw new IllegalArgumentException("width must be between 1 and 1024, was " + width);
+            }
+            this.dismissWidth = width;
+            return this;
+        }
+
         public Builder onDismiss(Consumer<Player> onDismiss) {
             this.onDismiss = onDismiss;
             return this;
@@ -72,12 +92,14 @@ public non-sealed interface NoticeDialog extends UnifiedDialog {
             final Component t = title;
             final @Nullable Component b = body;
             final Component dl = dismissLabel;
+            final @Nullable Integer dw = dismissWidth;
             final Consumer<Player> dismiss = onDismiss;
             final Consumer<Player> close = onClose;
             return new NoticeDialog() {
                 @Override public Component title() { return t; }
                 @Override public @Nullable Component body() { return b; }
                 @Override public Component dismissLabel() { return dl; }
+                @Override public @Nullable Integer dismissWidth() { return dw; }
                 @Override public Consumer<Player> onDismiss() { return dismiss; }
                 @Override public Consumer<Player> onClose() { return close; }
             };

@@ -100,6 +100,38 @@ UnifiedDialog dialog = InputDialog.builder()
 | `getDropdownOptionId(key)`      | Get selected dropdown option ID         |
 | `getDropdownIndex(key)`         | Get selected dropdown index             |
 
+### Button and input widths (Java Edition only)
+
+Buttons and text/slider/dropdown inputs accept an optional `width` (pixels, 1-1024).
+Bedrock Edition ignores width — its forms control layout themselves.
+
+```java
+ConfirmDialog.builder()
+    .yesLabel(Component.text("Confirm")).yesWidth(180)
+    .noLabel(Component.text("Cancel")).noWidth(120)
+    .build();
+
+NoticeDialog.builder().dismissLabel(Component.text("OK")).dismissWidth(100).build();
+
+MultiButtonDialog.builder()
+    .button(Component.text("Wide"), 300, p -> {})   // explicit width
+    .button(Component.text("Default"), p -> {})     // platform default
+    .build();
+
+InputDialog.builder()
+    .submitLabel(Component.text("Save")).submitWidth(180)
+    .cancelLabel(Component.text("Cancel")).cancelWidth(120)
+    .addInput(TextInput.builder("name").label(Component.text("Name")).width(240).build())
+    .addInput(SliderInput.builder("amount").label(Component.text("Amount"))
+        .min(1).max(64).width(240).build())
+    .addInput(DropdownInput.builder("item").label(Component.text("Item"))
+        .addOption("diamond", Component.text("Diamond")).width(240).build())
+    .build();
+```
+
+In YAML configs, the same fields are exposed as `yes_width`, `no_width`, `dismiss_width`,
+`submit_width`, `cancel_width`, and per-button/per-input `width:` keys.
+
 ## Platform Differences
 
 | Feature                     | Java Edition (Paper) | Bedrock Edition (Geyser) |
@@ -108,5 +140,6 @@ UnifiedDialog dialog = InputDialog.builder()
 | On-close callback           | Best-effort          | Not supported            |
 | Programmatic close          | Supported            | Requires Floodgate       |
 | Slider step (float)         | Supported            | Rounded to integer       |
+| Button / input widths       | Supported (1-1024)   | Ignored                  |
 
 > Callbacks may be invoked from a network thread on Bedrock Edition. Always schedule Bukkit API calls with `Bukkit.getScheduler().runTask(...)`.
