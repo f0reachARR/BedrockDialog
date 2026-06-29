@@ -30,43 +30,59 @@ import java.util.function.Consumer;
  */
 public non-sealed interface InputDialog extends UnifiedDialog {
 
+    /** {@return the title shown at the top of the dialog} */
     Component title();
 
+    /**
+     * {@return the body text shown below the title, or {@code null} if no body
+     * should be rendered}
+     */
     @Nullable
     Component body();
 
+    /** {@return the ordered, unmodifiable list of input fields in this dialog} */
     List<DialogInput> inputs();
 
+    /** {@return the label of the submit button} */
     Component submitLabel();
 
+    /** {@return the label of the cancel button} */
     Component cancelLabel();
 
     /**
-     * Desired width of the submit button on Java Edition (1-1024), or {@code null}
-     * to use the platform default. Ignored on Bedrock Edition.
+     * {@return the desired width of the submit button on Java Edition (1-1024),
+     * or {@code null} to use the platform default}
+     * Ignored on Bedrock Edition.
      */
     @Nullable
     Integer submitWidth();
 
     /**
-     * Desired width of the cancel button on Java Edition (1-1024), or {@code null}
-     * to use the platform default. Ignored on Bedrock Edition.
+     * {@return the desired width of the cancel button on Java Edition (1-1024),
+     * or {@code null} to use the platform default}
+     * Ignored on Bedrock Edition.
      */
     @Nullable
     Integer cancelWidth();
 
+    /**
+     * {@return the callback invoked when the player presses the submit button,
+     * supplied with the collected {@link InputResponse}}
+     */
     BiConsumer<Player, InputResponse> onSubmit();
 
     /**
-     * Called when the dialog is closed without submitting.
+     * {@return the callback invoked when the dialog closes without submitting}
      * Best-effort: may not fire on Paper (Java Edition).
      */
     Consumer<Player> onClose();
 
+    /** {@return a new builder for an {@link InputDialog}} */
     static Builder builder() {
         return new Builder();
     }
 
+    /** Builder for {@link InputDialog}. */
     final class Builder {
         private Component title = Component.empty();
         private @Nullable Component body = null;
@@ -83,26 +99,58 @@ public non-sealed interface InputDialog extends UnifiedDialog {
         private Builder() {
         }
 
+        /**
+         * Sets the dialog title.
+         *
+         * @param title the title to display
+         * @return this builder
+         */
         public Builder title(Component title) {
             this.title = title;
             return this;
         }
 
+        /**
+         * Sets the dialog body. Pass {@code null} to omit the body.
+         *
+         * @param body the body text, or {@code null} to render no body
+         * @return this builder
+         */
         public Builder body(Component body) {
             this.body = body;
             return this;
         }
 
+        /**
+         * Appends an input field. Each input's {@link DialogInput#key() key}
+         * must be unique within the dialog; duplicates are rejected at
+         * {@link #build()} time.
+         *
+         * @param input the input field to add
+         * @return this builder
+         */
         public Builder addInput(DialogInput input) {
             this.inputs.add(input);
             return this;
         }
 
+        /**
+         * Sets the label of the submit button (defaults to "Submit").
+         *
+         * @param submitLabel the label to display on the submit button
+         * @return this builder
+         */
         public Builder submitLabel(Component submitLabel) {
             this.submitLabel = submitLabel;
             return this;
         }
 
+        /**
+         * Sets the label of the cancel button (defaults to "Cancel").
+         *
+         * @param cancelLabel the label to display on the cancel button
+         * @return this builder
+         */
         public Builder cancelLabel(Component cancelLabel) {
             this.cancelLabel = cancelLabel;
             return this;
@@ -112,6 +160,8 @@ public non-sealed interface InputDialog extends UnifiedDialog {
          * Sets the desired width of the submit button on Java Edition.
          *
          * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         * @return this builder
+         * @throws IllegalArgumentException if {@code width} is outside 1-1024
          */
         public Builder submitWidth(int width) {
             if (width < 1 || width > 1024) {
@@ -125,6 +175,8 @@ public non-sealed interface InputDialog extends UnifiedDialog {
          * Sets the desired width of the cancel button on Java Edition.
          *
          * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         * @return this builder
+         * @throws IllegalArgumentException if {@code width} is outside 1-1024
          */
         public Builder cancelWidth(int width) {
             if (width < 1 || width > 1024) {
@@ -134,16 +186,38 @@ public non-sealed interface InputDialog extends UnifiedDialog {
             return this;
         }
 
+        /**
+         * Sets the callback for the submit button. The supplied
+         * {@link InputResponse} contains the values entered by the player.
+         * Callbacks may run off the main server thread — schedule Bukkit API
+         * calls with the scheduler.
+         *
+         * @param onSubmit callback invoked with the player and submitted response
+         * @return this builder
+         */
         public Builder onSubmit(BiConsumer<Player, InputResponse> onSubmit) {
             this.onSubmit = onSubmit;
             return this;
         }
 
+        /**
+         * Sets the callback fired when the dialog closes without submitting.
+         * Best-effort — may not fire on Paper (Java Edition).
+         *
+         * @param onClose callback invoked with the player when the dialog closes
+         * @return this builder
+         */
         public Builder onClose(Consumer<Player> onClose) {
             this.onClose = onClose;
             return this;
         }
 
+        /**
+         * Builds the immutable {@link InputDialog}.
+         *
+         * @return a new immutable {@link InputDialog} with the configured inputs
+         * @throws IllegalStateException if two inputs share the same key
+         */
         public InputDialog build() {
             Set<String> seen = new HashSet<>();
             for (DialogInput input : inputs) {

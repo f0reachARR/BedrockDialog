@@ -35,6 +35,10 @@ processResources {
     }
 }
 
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "bedrockdialog"

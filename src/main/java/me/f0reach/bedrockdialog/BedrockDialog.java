@@ -85,6 +85,7 @@ public final class BedrockDialog {
     /**
      * Returns the singleton instance.
      *
+     * @return the active {@code BedrockDialog} singleton
      * @throws IllegalStateException if {@link #init(Plugin)} has not been called
      */
     public static BedrockDialog get() {
@@ -115,9 +116,14 @@ public final class BedrockDialog {
 
     /**
      * Closes any open dialog for the given player, if supported by the platform.
-     * 
+     *
+     * <p>
+     * On Java Edition (Paper) this always closes the active dialog. On Bedrock
+     * Edition this requires Floodgate; with Geyser-only installations the call
+     * is a no-op due to API limitations.
+     * </p>
+     *
      * @param player the player whose dialog should be closed
-     * @return
      */
     public void closeDialog(Player player) {
         DialogPlatform platform = resolvePlatform(player);
