@@ -40,34 +40,49 @@ public final class SliderInput implements DialogInput {
         return label;
     }
 
+    /** {@return the minimum value of the slider} */
     public float min() {
         return min;
     }
 
+    /** {@return the maximum value of the slider} */
     public float max() {
         return max;
     }
 
+    /**
+     * {@return the step size between selectable values}
+     * Rounded to the nearest integer on Bedrock Edition (minimum 1).
+     */
     public float step() {
         return step;
     }
 
+    /** {@return the initial value of the slider} */
     public float defaultValue() {
         return defaultValue;
     }
 
     /**
-     * The desired width of this input on Java Edition (1-1024), or {@code null}
-     * to use the platform default. Ignored on Bedrock Edition.
+     * {@return the desired width of this input on Java Edition (1-1024), or
+     * {@code null} to use the platform default}
+     * Ignored on Bedrock Edition.
      */
     public @Nullable Integer width() {
         return width;
     }
 
+    /**
+     * Returns a new builder for a {@link SliderInput}.
+     *
+     * @param key unique key identifying this input within its dialog
+     * @return a new {@link Builder}
+     */
     public static Builder builder(String key) {
         return new Builder(key);
     }
 
+    /** Builder for {@link SliderInput}. */
     public static final class Builder {
         private final String key;
         private Component label = Component.empty();
@@ -81,26 +96,57 @@ public final class SliderInput implements DialogInput {
             this.key = key;
         }
 
+        /**
+         * Sets the display label shown next to the slider.
+         *
+         * @param label the label to display next to the slider
+         * @return this builder
+         */
         public Builder label(Component label) {
             this.label = label;
             return this;
         }
 
+        /**
+         * Sets the minimum value of the slider.
+         *
+         * @param min the minimum value
+         * @return this builder
+         */
         public Builder min(float min) {
             this.min = min;
             return this;
         }
 
+        /**
+         * Sets the maximum value of the slider.
+         *
+         * @param max the maximum value
+         * @return this builder
+         */
         public Builder max(float max) {
             this.max = max;
             return this;
         }
 
+        /**
+         * Sets the step size between selectable values.
+         * Rounded to the nearest integer on Bedrock Edition.
+         *
+         * @param step the step size
+         * @return this builder
+         */
         public Builder step(float step) {
             this.step = step;
             return this;
         }
 
+        /**
+         * Sets the initial value of the slider.
+         *
+         * @param defaultValue the initial value
+         * @return this builder
+         */
         public Builder defaultValue(float defaultValue) {
             this.defaultValue = defaultValue;
             return this;
@@ -110,6 +156,8 @@ public final class SliderInput implements DialogInput {
          * Sets the desired width of the input on Java Edition.
          *
          * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         * @return this builder
+         * @throws IllegalArgumentException if {@code width} is outside 1-1024
          */
         public Builder width(int width) {
             if (width < 1 || width > 1024) {
@@ -119,6 +167,7 @@ public final class SliderInput implements DialogInput {
             return this;
         }
 
+        /** {@return a new immutable {@link SliderInput} with the configured values} */
         public SliderInput build() {
             return new SliderInput(this);
         }

@@ -17,40 +17,53 @@ import java.util.function.Consumer;
  */
 public non-sealed interface ConfirmDialog extends UnifiedDialog {
 
+    /** {@return the title shown at the top of the dialog} */
     Component title();
 
+    /**
+     * {@return the body text shown below the title, or {@code null} if no body
+     * should be rendered}
+     */
     @Nullable Component body();
 
+    /** {@return the label of the affirmative ("Yes") button} */
     Component yesLabel();
 
+    /** {@return the label of the negative ("No") button} */
     Component noLabel();
 
     /**
-     * Desired width of the Yes button on Java Edition (1-1024), or {@code null}
-     * to use the platform default. Ignored on Bedrock Edition.
+     * {@return the desired width of the Yes button on Java Edition (1-1024),
+     * or {@code null} to use the platform default}
+     * Ignored on Bedrock Edition.
      */
     @Nullable Integer yesWidth();
 
     /**
-     * Desired width of the No button on Java Edition (1-1024), or {@code null}
-     * to use the platform default. Ignored on Bedrock Edition.
+     * {@return the desired width of the No button on Java Edition (1-1024),
+     * or {@code null} to use the platform default}
+     * Ignored on Bedrock Edition.
      */
     @Nullable Integer noWidth();
 
+    /** {@return the callback invoked when the player presses the Yes button} */
     Consumer<Player> onYes();
 
+    /** {@return the callback invoked when the player presses the No button} */
     Consumer<Player> onNo();
 
     /**
-     * Called when the dialog is closed without a button press.
+     * {@return the callback invoked when the dialog closes without a button press}
      * Best-effort: may not fire on Paper (Java Edition).
      */
     Consumer<Player> onClose();
 
+    /** {@return a new builder for a {@link ConfirmDialog}} */
     static Builder builder() {
         return new Builder();
     }
 
+    /** Builder for {@link ConfirmDialog}. */
     final class Builder {
         private Component title = Component.empty();
         private @Nullable Component body = null;
@@ -64,21 +77,45 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
 
         private Builder() {}
 
+        /**
+         * Sets the dialog title.
+         *
+         * @param title the title to display
+         * @return this builder
+         */
         public Builder title(Component title) {
             this.title = title;
             return this;
         }
 
+        /**
+         * Sets the dialog body. Pass {@code null} to omit the body.
+         *
+         * @param body the body text, or {@code null} to render no body
+         * @return this builder
+         */
         public Builder body(Component body) {
             this.body = body;
             return this;
         }
 
+        /**
+         * Sets the label of the Yes button (defaults to "Yes").
+         *
+         * @param yesLabel the label to display on the Yes button
+         * @return this builder
+         */
         public Builder yesLabel(Component yesLabel) {
             this.yesLabel = yesLabel;
             return this;
         }
 
+        /**
+         * Sets the label of the No button (defaults to "No").
+         *
+         * @param noLabel the label to display on the No button
+         * @return this builder
+         */
         public Builder noLabel(Component noLabel) {
             this.noLabel = noLabel;
             return this;
@@ -88,6 +125,8 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
          * Sets the desired width of the Yes button on Java Edition.
          *
          * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         * @return this builder
+         * @throws IllegalArgumentException if {@code width} is outside 1-1024
          */
         public Builder yesWidth(int width) {
             if (width < 1 || width > 1024) {
@@ -101,6 +140,8 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
          * Sets the desired width of the No button on Java Edition.
          *
          * @param width width in pixels (1-1024); ignored on Bedrock Edition
+         * @return this builder
+         * @throws IllegalArgumentException if {@code width} is outside 1-1024
          */
         public Builder noWidth(int width) {
             if (width < 1 || width > 1024) {
@@ -110,21 +151,43 @@ public non-sealed interface ConfirmDialog extends UnifiedDialog {
             return this;
         }
 
+        /**
+         * Sets the callback for the Yes button. Callbacks may run off the main
+         * server thread — schedule Bukkit API calls with the scheduler.
+         *
+         * @param onYes callback invoked with the player who pressed Yes
+         * @return this builder
+         */
         public Builder onYes(Consumer<Player> onYes) {
             this.onYes = onYes;
             return this;
         }
 
+        /**
+         * Sets the callback for the No button. Callbacks may run off the main
+         * server thread — schedule Bukkit API calls with the scheduler.
+         *
+         * @param onNo callback invoked with the player who pressed No
+         * @return this builder
+         */
         public Builder onNo(Consumer<Player> onNo) {
             this.onNo = onNo;
             return this;
         }
 
+        /**
+         * Sets the callback fired when the dialog closes without a button press.
+         * Best-effort — may not fire on Paper (Java Edition).
+         *
+         * @param onClose callback invoked with the player when the dialog closes
+         * @return this builder
+         */
         public Builder onClose(Consumer<Player> onClose) {
             this.onClose = onClose;
             return this;
         }
 
+        /** {@return a new immutable {@link ConfirmDialog} with the configured values} */
         public ConfirmDialog build() {
             final Component t = title;
             final @Nullable Component b = body;
