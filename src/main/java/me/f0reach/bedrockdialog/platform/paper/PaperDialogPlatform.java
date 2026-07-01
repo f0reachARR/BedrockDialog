@@ -98,7 +98,7 @@ public class PaperDialogPlatform implements DialogPlatform {
         Dialog dialog = buildDialog(
                 buildBase(d.title(), d.body(), List.of()),
                 // multiAction(List) returns MultiActionType.Builder; call build() to finalize
-                DialogType.multiAction(buttons).build());
+                DialogType.multiAction(buttons).columns(1).build());
         player.showDialog(dialog);
     }
 
@@ -166,7 +166,8 @@ public class PaperDialogPlatform implements DialogPlatform {
     private ActionButton button(Component label, @Nullable Integer width, DialogActionCallback onClick) {
         ActionButton.Builder b = ActionButton.builder(label)
                 .action(DialogAction.customClick(onClick, CB_OPTIONS));
-        if (width != null) b.width(width);
+        if (width != null)
+            b.width(width);
         return b.build();
     }
 
@@ -194,7 +195,8 @@ public class PaperDialogPlatform implements DialogPlatform {
             switch (input) {
                 case TextInput ti -> {
                     var builder = DialogInput.text(ti.key(), ti.label()).initial(ti.defaultValue());
-                    if (ti.width() != null) builder.width(ti.width());
+                    if (ti.width() != null)
+                        builder.width(ti.width());
                     result.add(builder.build());
                 }
                 case SliderInput si -> {
