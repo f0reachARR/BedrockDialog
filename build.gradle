@@ -45,7 +45,7 @@ modrinth {
     versionNumber = project.version
     versionType = "release"
     uploadFile = jar
-    gameVersions = ["1.21.8", "1.21.9", "1.21.10", "1.21.11"]
+    gameVersions = ["1.21.8", "1.21.9", "1.21.10", "1.21.11", "26.1", "26.1.1", "26.1.2", "26.2"]
     loaders = ["paper", "purpur"]
     syncBodyFrom = rootProject.file("README.md").text
     def releaseChangelog = System.getenv("RELEASE_CHANGELOG")
